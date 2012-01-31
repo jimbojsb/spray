@@ -50,6 +50,9 @@ class Wrapper
     {
         $val = substr($this->output, $this->currentPosition, $count);
         $this->currentPosition += $count;
+        if ($this->currentPosition > strlen($this->output)) {
+            $this->currentPosition = strlen($this->output);
+        }
         return $val;
     }
 
