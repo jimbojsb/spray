@@ -9,19 +9,24 @@ class Wrapper
     protected $output = '';
     protected $currentPosition = 0;
 
-    protected static $overrideWrappers = array('http', 'https');
+    public static $overrideWrappers = array('http', 'https');
+
+    protected static $init = false;
+    protected static $existingWrappers;
     protected static $response;
     protected static $request;
 
     public static function init()
     {
-        $existingWrappers = stream_get_wrappers();
+        self::$existingWrappers = stream_get_wrappers();
         foreach (self::$overrideWrappers as $wrapper) {
-            if (in_array($wrapper, $existingWrappers)) {
+            if (in_array($wrapper, self::$existingWrappers)) {
                 stream_wrapper_unregister($wrapper);
-                stream_wrapper_register($wrapper, "Spray\\Wrapper", true);
             }
+            stream_wrapper_register($wrapper, "Spray\\Wrapper", true);
         }
+
+        self::$init = true;
     }
 
     public function stream_open($path, $mode, $options, &$opened_path)
@@ -60,8 +65,17 @@ class Wrapper
 
     public static function reset()
     {
-        foreach (self::$overrideWrappers as $wrapper) {
-            stream_wrapper_restore($wrapper);
+        if (self::$init == false) {
+            return false;
         }
+
+        foreach (self::$overrideWrappers as $wrapper) {
+            stream_wrapper_unregister($wrapper);
+            if (in_array($wrapper, self::$existingWrappers)) {
+                stream_wrapper_restore($wrapper);
+            }
+        }
+
+        self::$init = false;
     }
 }
