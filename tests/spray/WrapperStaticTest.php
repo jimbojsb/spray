@@ -36,10 +36,5 @@ class WrapperStaticTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($old_wrappers, $new_wrappers);
     }
 
-    public function testSetResponse()
-    {
-        $this->markTestIncomplete("OBSOLETE: Will be replaced with better functionality");
-    }
-
 }
 ?>
