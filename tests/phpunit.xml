@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+    <phpunit bootstrap="bootstrap.php" colors="true" verbose="true">
+    <testsuite name="Spray Tests">
+        <directory>spray</directory>
+    </testsuite>
+</phpunit>
