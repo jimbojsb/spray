@@ -42,3 +42,4 @@ class Response
         return $output;
     }
 }
+?>

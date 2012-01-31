@@ -82,3 +82,4 @@ class Wrapper
         self::$init = false;
     }
 }
+?>
