@@ -10,7 +10,7 @@ class Spray
     protected $currentPosition = 0;
 
     protected static $init = false;
-    protected static $existingWrappers;
+    protected static $existingWrappers = array();
     protected static $responses = array();
 
     public static function stub($url, array $response)
@@ -29,15 +29,14 @@ class Spray
             if (in_array($scheme, $registeredWrappers)) {
                 stream_wrapper_unregister($scheme);
             }
-            stream_wrapper_register($scheme, "Spray\\Wrapper", true);
-            self::$existingWrappersp[] = $scheme;
+            stream_wrapper_register($scheme, "Spray", true);
+            self::$existingWrappers[] = $scheme;
         }
     }
 
     public function stream_open($path, $mode, $options, &$opened_path)
     {
-        self::$request = new Request();
-        $this->output = (string) self::$response;
+        $this->output = $this->renderResponse(self::$responses[$path]);
         return true;
     }
 
