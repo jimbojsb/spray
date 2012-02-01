@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
     <phpunit bootstrap="bootstrap.php" colors="true" verbose="true">
     <testsuite name="Spray Tests">
+        <file>spray/SprayTest.php</file>
         <file>spray/IntegrationTest.php</file>
     </testsuite>
 </phpunit>
