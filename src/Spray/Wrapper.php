@@ -9,9 +9,8 @@ class Wrapper
     protected $output = '';
     protected $currentPosition = 0;
 
-    public static $overrideWrappers = array('http', 'https');
-
     protected static $init = false;
+    protected static $overrideWrappers = array('http', 'https');
     protected static $existingWrappers;
     protected static $response;
     protected static $request;
@@ -27,6 +26,16 @@ class Wrapper
         }
 
         self::$init = true;
+    }
+
+    public static function getOverrideWrappers()
+    {
+        return self::$overrideWrappers;
+    }
+
+    public static function setOverrideWrappers(Array $newWrappers)
+    {
+        self::$overrideWrappers = $newWrappers;
     }
 
     public function stream_open($path, $mode, $options, &$opened_path)

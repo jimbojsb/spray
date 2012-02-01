@@ -4,14 +4,14 @@ class WrapperStaticTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->orig_wrappers = Spray\Wrapper::$overrideWrappers;
-        Spray\Wrapper::$overrideWrappers = array('test');
+        $this->orig_wrappers = Spray\Wrapper::getOverrideWrappers();
+        Spray\Wrapper::setOverrideWrappers(array('test'));
     }
 
     public function tearDown()
     {
         Spray\Wrapper::reset();
-        Spray\Wrapper::$overrideWrappers = $this->orig_wrappers;
+        Spray\Wrapper::setOverrideWrappers($this->orig_wrappers);
     }
 
     public function testInit()
