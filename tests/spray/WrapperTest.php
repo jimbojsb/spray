@@ -72,4 +72,3 @@ class WrapperTest extends PHPUnit_Extensions_OutputTestCase
         return $property->getValue($this->spray);
     }
 }
-?>
