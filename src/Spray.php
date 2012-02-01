@@ -75,17 +75,16 @@ class Spray
 
     private static function renderResponse(array $response)
     {
-        extract($response);
+        $status = $response['status'] ? $response['status'] : self::STATUS_200;
         if (is_int($status)) {
             $status = constant("Spray::STATUS_$status");
         }
-
+        $headers = $response['headers'] ? $response['headers'] : array();
         $output = "HTTP/1.0 $status\r\n";
         foreach ($headers as $header => $value) {
             $output .= "$header: $value\r\n";
         }
-        $output .= "\r\n";
-        $output .= $body;
+        $output .= "\r\n{$response['body']}";
         return $output;
     }
 }
