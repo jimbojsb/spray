@@ -1,27 +1,41 @@
 <?php
 namespace Spray;
 
-require_once __DIR__ . DIRECTORY_SEPARATOR  . 'Request.php';
-require_once __DIR__ . DIRECTORY_SEPARATOR  . 'Response.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Request.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Response.php';
 
 class Wrapper
 {
     protected $output = '';
     protected $currentPosition = 0;
 
+    protected static $init = false;
     protected static $overrideWrappers = array('http', 'https');
+    protected static $existingWrappers;
     protected static $response;
     protected static $request;
 
     public static function init()
     {
-        $existingWrappers = stream_get_wrappers();
+        self::$existingWrappers = stream_get_wrappers();
         foreach (self::$overrideWrappers as $wrapper) {
-            if (in_array($wrapper, $existingWrappers)) {
+            if (in_array($wrapper, self::$existingWrappers)) {
                 stream_wrapper_unregister($wrapper);
-                stream_wrapper_register($wrapper, "Spray\\Wrapper", true);
             }
+            stream_wrapper_register($wrapper, "Spray\\Wrapper", true);
         }
+
+        self::$init = true;
+    }
+
+    public static function getOverrideWrappers()
+    {
+        return self::$overrideWrappers;
+    }
+
+    public static function setOverrideWrappers(Array $newWrappers)
+    {
+        self::$overrideWrappers = $newWrappers;
     }
 
     public function stream_open($path, $mode, $options, &$opened_path)
@@ -45,6 +59,9 @@ class Wrapper
     {
         $val = substr($this->output, $this->currentPosition, $count);
         $this->currentPosition += $count;
+        if ($this->currentPosition > strlen($this->output)) {
+            $this->currentPosition = strlen($this->output);
+        }
         return $val;
     }
 
@@ -60,8 +77,17 @@ class Wrapper
 
     public static function reset()
     {
-        foreach (self::$overrideWrappers as $wrapper) {
-            stream_wrapper_restore($wrapper);
+        if (self::$init == false) {
+            return false;
         }
+
+        foreach (self::$overrideWrappers as $wrapper) {
+            stream_wrapper_unregister($wrapper);
+            if (in_array($wrapper, self::$existingWrappers)) {
+                stream_wrapper_restore($wrapper);
+            }
+        }
+
+        self::$init = false;
     }
 }
