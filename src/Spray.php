@@ -81,6 +81,9 @@ class Spray
 
     private static function renderResponse(array $response)
     {
+        if ($response['raw']) {
+            return $response['raw'];
+        }
         $status = $response['status'] ? $response['status'] : self::STATUS_200;
         if (is_int($status)) {
             $status = constant("Spray::STATUS_$status");

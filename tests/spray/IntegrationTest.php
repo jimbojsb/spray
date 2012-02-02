@@ -12,4 +12,13 @@ class IntegrationTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, file_get_contents('http://test'));
     }
+
+    public function testRawSpray()
+    {
+        $raw = "this is some raw text";
+        $response = array('raw' => $raw);
+        Spray::stub('foo://bar', $response);
+
+        $this->assertEquals($raw, file_get_contents('foo://bar'));
+    }
 }
