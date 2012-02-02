@@ -38,7 +38,7 @@ class Spray
 
     public function stream_open($path, $mode, $options, &$opened_path)
     {
-        $this->output = $this->renderResponse(self::$responses[$path]);
+        $this->output = $this->renderResponse(self::$responses[$path], $this->context);
         return true;
     }
 
@@ -79,10 +79,14 @@ class Spray
         self::$existingWrappers = array();
     }
 
-    private static function renderResponse(array $response)
+    private static function renderResponse(array $response, $context)
     {
         if ($response['raw']) {
             return $response['raw'];
+        }
+        if ($response['echo_back']) {
+            $options = array_shift(stream_context_get_options($context));
+            return $options[$response['echo_back']];
         }
         $status = $response['status'] ? $response['status'] : self::STATUS_200;
         if (is_int($status)) {

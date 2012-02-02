@@ -21,4 +21,15 @@ class IntegrationTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($raw, file_get_contents('foo://bar'));
     }
+
+    public function testEchoBackSpray()
+    {
+        $response = array('echo_back' => 'content');
+        Spray::stub('foo://bar', $response);
+
+        $content = 'this is some content to be echod back';
+        $context = stream_context_create(array('foo' => array('content' => $content)));
+
+        $this->assertEquals($content, file_get_contents('foo://bar', false, $context));
+    }
 }
