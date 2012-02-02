@@ -11,6 +11,7 @@ class Spray
 
     protected static $init = false;
     protected static $existingWrappers = array();
+    protected static $originalWrappers = array();
     protected static $responses = array();
 
     public static function stub($url, array $response)
@@ -27,6 +28,7 @@ class Spray
         if (!in_array($scheme, self::$existingWrappers)) {
             $registeredWrappers = stream_get_wrappers();
             if (in_array($scheme, $registeredWrappers)) {
+                self::$originalWrappers[] = $scheme;
                 stream_wrapper_unregister($scheme);
             }
             stream_wrapper_register($scheme, "Spray", true);
@@ -69,8 +71,12 @@ class Spray
     {
         foreach (self::$existingWrappers as $wrapper) {
             stream_wrapper_unregister($wrapper);
-            stream_wrapper_restore($wrapper);
+            if (in_array($wrapper, self::$originalWrappers)) {
+                stream_wrapper_restore($wrapper);
+            }
         }
+        self::$originalWrappers = array();
+        self::$existingWrappers = array();
     }
 
     private static function renderResponse(array $response)
