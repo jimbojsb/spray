@@ -1,43 +1,34 @@
 <?php
-class WrapperTest extends PHPUnit_Extensions_OutputTestCase
+class SprayTest extends PHPUnit_Extensions_OutputTestCase
 {
-
     public function setUp()
     {
-        Spray\Wrapper::init();
-        $this->spray = new Spray\Wrapper();
-    }
-
-    public function tearDown()
-    {
-        Spray\Wrapper::reset();
+        $this->spray = new Spray();
     }
 
     public function testStream_open()
     {
-        $testResponse = 'test';
         $_ = null;
-        $this->changePrivateProperty('response', $testResponse);
-        $this->assertTrue($this->spray->stream_open(null, null, null, $_));
-        $this->assertEquals($this->getPrivateProperty('output'), $testResponse);
-        $this->assertInstanceOf('Spray\Request', $this->getPrivateProperty('request'));
+        $expected = "HTTP/1.0 200 OK\r\n\r\nfoo";
+        $this->setPrivate('responses', array('http://url' => array('body' => 'foo')));
+        $this->assertTrue($this->spray->stream_open('http://url', null, null, $_));
+        $this->assertEquals($expected, $this->getPrivate('output'));
     }
 
     public function testStream_write()
     {
-        $testString = 'test';
-        $this->expectOutputString($testString);
-        $this->spray->stream_write($testString);
+        $this->expectOutputString('test');
+        $this->spray->stream_write('test');
     }
 
     public function testStream_eof()
     {
         $this->assertTrue($this->spray->stream_eof());
 
-        $this->changePrivateProperty('output', 'test');
+        $this->setPrivate('output', 'test');
         $this->assertFalse($this->spray->stream_eof());
 
-        $this->changePrivateProperty('currentPosition', 4);
+        $this->setPrivate('currentPosition', 4);
         $this->assertTrue($this->spray->stream_eof());
     }
 
@@ -45,7 +36,7 @@ class WrapperTest extends PHPUnit_Extensions_OutputTestCase
     {
         $this->assertEmpty($this->spray->stream_read(1));
 
-        $this->changePrivateProperty('output','hello world');
+        $this->setPrivate('output','hello world');
         $this->assertEquals($this->spray->stream_read(5), 'hello');
 
         $this->assertEquals($this->spray->stream_read(6), ' world');
@@ -58,14 +49,14 @@ class WrapperTest extends PHPUnit_Extensions_OutputTestCase
         $this->assertEquals(array(), $this->spray->stream_stat());
     }
 
-    private function changePrivateProperty($prop, $value)
+    private function setPrivate($prop, $value)
     {
         $property = new ReflectionProperty($this->spray, $prop);
         $property->setAccessible(true);
         $property->setValue($this->spray, $value);
     }
 
-    private function getPrivateProperty($prop)
+    private function getPrivate($prop)
     {
         $property = new ReflectionProperty($this->spray, $prop);
         $property->setAccessible(true);

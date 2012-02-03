@@ -10,7 +10,8 @@ class Spray
     protected $currentPosition = 0;
 
     protected static $init = false;
-    protected static $existingWrappers;
+    protected static $existingWrappers = array();
+    protected static $originalWrappers = array();
     protected static $responses = array();
 
     public static function stub($url, array $response)
@@ -27,17 +28,17 @@ class Spray
         if (!in_array($scheme, self::$existingWrappers)) {
             $registeredWrappers = stream_get_wrappers();
             if (in_array($scheme, $registeredWrappers)) {
+                self::$originalWrappers[] = $scheme;
                 stream_wrapper_unregister($scheme);
             }
-            stream_wrapper_register($scheme, "Spray\\Wrapper", true);
-            self::$existingWrappersp[] = $scheme;
+            stream_wrapper_register($scheme, "Spray", true);
+            self::$existingWrappers[] = $scheme;
         }
     }
 
     public function stream_open($path, $mode, $options, &$opened_path)
     {
-        self::$request = new Request();
-        $this->output = (string) self::$response;
+        $this->output = $this->renderResponse(self::$responses[$path], $this->context);
         return true;
     }
 
@@ -70,23 +71,33 @@ class Spray
     {
         foreach (self::$existingWrappers as $wrapper) {
             stream_wrapper_unregister($wrapper);
-            stream_wrapper_restore($wrapper);
+            if (in_array($wrapper, self::$originalWrappers)) {
+                stream_wrapper_restore($wrapper);
+            }
         }
+        self::$originalWrappers = array();
+        self::$existingWrappers = array();
     }
 
-    private static function renderResponse(array $response)
+    private static function renderResponse(array $response, $context)
     {
-        extract($response);
+        if ($response['raw']) {
+            return $response['raw'];
+        }
+        if ($response['echo_back']) {
+            $options = array_shift(stream_context_get_options($context));
+            return $options[$response['echo_back']];
+        }
+        $status = $response['status'] ? $response['status'] : self::STATUS_200;
         if (is_int($status)) {
             $status = constant("Spray::STATUS_$status");
         }
-
+        $headers = $response['headers'] ? $response['headers'] : array();
         $output = "HTTP/1.0 $status\r\n";
         foreach ($headers as $header => $value) {
             $output .= "$header: $value\r\n";
         }
-        $output .= "\r\n";
-        $output .= $body;
+        $output .= "\r\n{$response['body']}";
         return $output;
     }
 }
