@@ -85,7 +85,8 @@ class Spray
             return $response['raw'];
         }
         if ($response['echo_back']) {
-            $options = array_shift(stream_context_get_options($context));
+            $contextOpts = stream_context_get_options($context);
+            $options = array_shift($contextOpts);
             return $options[$response['echo_back']];
         }
         $status = $response['status'] ? $response['status'] : self::STATUS_200;
