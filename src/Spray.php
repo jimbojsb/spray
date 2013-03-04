@@ -17,7 +17,7 @@ class Spray
     public static function stub($url, array $response)
     {
         self::$responses[$url] = $response;
-        $urlParts = @parse_url($url);
+        $urlParts = parse_url($url);
         if ($urlParts['scheme']) {
             self::wrap($urlParts['scheme']);
         }
