@@ -1,4 +1,6 @@
 <?php
+namespace Spray;
+
 class Spray
 {
     const STATUS_200 = "200 OK";
@@ -37,7 +39,7 @@ class Spray
                 self::$originalWrappers[] = $scheme;
                 stream_wrapper_unregister($scheme);
             }
-            stream_wrapper_register($scheme, "Spray", true);
+            stream_wrapper_register($scheme, 'Spray\Spray', true);
             self::$existingWrappers[] = $scheme;
         }
     }
