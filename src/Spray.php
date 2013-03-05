@@ -23,6 +23,12 @@ class Spray
         }
     }
 
+    public static function regexStub($scheme, $regex, array $response)
+    {
+        self::$responses['regex'][$regex] = $response;
+        self::wrap($scheme);
+    }
+
     private static function wrap($scheme)
     {
         if (!in_array($scheme, self::$existingWrappers)) {
@@ -38,8 +44,20 @@ class Spray
 
     public function stream_open($path, $mode, $options, &$opened_path)
     {
-        $this->output = $this->renderResponse(self::$responses[$path], $this->context);
-        return true;
+        if (self::$responses[$path]) {
+            $this->output = $this->renderResponse(self::$responses[$path], $this->context);
+            return true;
+        }
+
+        foreach(self::$responses['regex'] as $regex => $response) {
+            $partialPath = str_replace(parse_url($path, PHP_URL_SCHEME), '', $path);
+            if (preg_match($regex, $partialPath)) {
+                $this->output = $this->renderResponse($response, $this->context);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function stream_write($data)

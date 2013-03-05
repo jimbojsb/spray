@@ -1,5 +1,5 @@
 <?php
-class SprayTest extends PHPUnit_Extensions_OutputTestCase
+class SprayTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
@@ -12,6 +12,16 @@ class SprayTest extends PHPUnit_Extensions_OutputTestCase
         $expected = "HTTP/1.0 200 OK\r\n\r\nfoo";
         $this->setPrivate('responses', array('http://url' => array('body' => 'foo')));
         $this->assertTrue($this->spray->stream_open('http://url', null, null, $_));
+        $this->assertEquals($expected, $this->getPrivate('output'));
+    }
+
+    public function testRegexStream_open()
+    {
+        $_ = null;
+        $expected = "HTTP/1.0 200 OK\r\n\r\nfoo";
+        $this->setPrivate('responses', array('regex' => array('`url/.*`' => array('body' => 'foo'))));
+        $this->assertTrue($this->spray->stream_open('http://url/foo/bar?wtf=bbq#frag', null, null, $_));
+        $this->assertTrue($this->spray->stream_open('http://url/watwat', null, null, $_));
         $this->assertEquals($expected, $this->getPrivate('output'));
     }
 
